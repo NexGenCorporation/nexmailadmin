@@ -109,49 +109,119 @@
             padding: 10px;
             text-align: center;
         }
+
+        /* Hidden portal content */
+        #mainPortal {
+            display: none;
+        }
+
+        #authScreen {
+            display: flex;
+        }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="brand"><span>Nex</span>Mail Portal</div>
-        
-        <!-- Field for your Resend API Key -->
-        <div class="form-group">
-            <label>Resend API Key</label>
-            <input type="password" id="apiKey" placeholder="re_123456789...">
+    <!-- Authentication Screen -->
+    <div id="authScreen">
+        <div class="login-card">
+            <div class="brand"><span>Nex</span>Mail Portal</div>
+            
+            <div class="form-group">
+                <label>Admin Access Code</label>
+                <input type="password" id="accessCode" placeholder="Enter access code...">
+            </div>
+
+            <button class="btn-send" onclick="verifyAccess()">Authenticate</button>
+
+            <div id="authStatus" class="status-message"></div>
         </div>
+    </div>
 
-        <!-- Sender Address (Your verified Resend domain) -->
-        <div class="form-group">
-            <label>From Address</label>
-            <input type="email" id="fromEmail" value="ceomain@mail.nxgcorp.dpdns.org">
+    <!-- Main Portal (Hidden until authenticated) -->
+    <div id="mainPortal">
+        <div class="login-card">
+            <div class="brand"><span>Nex</span>Mail Portal</div>
+            
+            <!-- Field for your Resend API Key -->
+            <div class="form-group">
+                <label>Resend API Key</label>
+                <input type="password" id="apiKey" placeholder="re_123456789...">
+            </div>
+
+            <!-- Sender Address (Your verified Resend domain) -->
+            <div class="form-group">
+                <label>From Address</label>
+                <input type="email" id="fromEmail" value="ceomain@mail.nxgcorp.dpdns.org">
+            </div>
+
+            <!-- Recipient Address -->
+            <div class="form-group">
+                <label>To Address</label>
+                <input type="email" id="toEmail" placeholder="recipient@example.com">
+            </div>
+
+            <!-- Message Details -->
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" id="subject" value="NexMail System Alert">
+            </div>
+
+            <div class="form-group">
+                <label>Message Body (HTML Supported)</label>
+                <textarea id="message" placeholder="Type your email content here..."></textarea>
+            </div>
+
+            <!-- Execution action acting as your login mechanism -->
+            <button class="btn-send" onclick="sendMailViaAPI()">Execute Send</button>
+
+            <button class="btn-send" onclick="logout()" style="background-color: #262626; color: #aaaaaa; border-color: #262626; margin-top: 5px;">Logout</button>
+
+            <div id="status" class="status-message"></div>
         </div>
-
-        <!-- Recipient Address -->
-        <div class="form-group">
-            <label>To Address</label>
-            <input type="email" id="toEmail" placeholder="recipient@example.com">
-        </div>
-
-        <!-- Message Details -->
-        <div class="form-group">
-            <label>Subject</label>
-            <input type="text" id="subject" value="NexMail System Alert">
-        </div>
-
-        <div class="form-group">
-            <label>Message Body (HTML Supported)</label>
-            <textarea id="message" placeholder="Type your email content here..."></textarea>
-        </div>
-
-        <!-- Execution action acting as your login mechanism -->
-        <button class="btn-send" onclick="sendMailViaAPI()">Execute Send</button>
-
-        <div id="status" class="status-message"></div>
     </div>
 
     <script>
+        // Obfuscated password verification (hidden in plain sight)
+        function verifyAccess() {
+            const inputCode = document.getElementById('accessCode').value;
+            const authStatus = document.getElementById('authStatus');
+            
+            // Password is hashed with a simple transformation
+            const correctHash = atob('UGVybzczczczIQ=='); // Base64 encoded: "Pero7373!"
+            
+            if (inputCode === correctHash) {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainPortal').style.display = 'flex';
+                document.getElementById('accessCode').value = '';
+            } else {
+                authStatus.style.display = 'block';
+                authStatus.style.backgroundColor = '#3a1414';
+                authStatus.style.color = '#ff6666';
+                authStatus.style.border = '1px solid #ff6666';
+                authStatus.innerText = 'Error: Invalid access code.';
+                document.getElementById('accessCode').value = '';
+            }
+        }
+
+        function logout() {
+            document.getElementById('mainPortal').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('apiKey').value = '';
+            document.getElementById('toEmail').value = '';
+            document.getElementById('message').value = '';
+            document.getElementById('status').style.display = 'none';
+        }
+
+        // Allow Enter key to submit password
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('accessCode').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    verifyAccess();
+                }
+            });
+        });
+
         async function sendMailViaAPI() {
             const apiKey = document.getElementById('apiKey').value;
             const fromEmail = document.getElementById('fromEmail').value;
@@ -214,5 +284,4 @@
     </script>
 
 </body>
-  </html>
-
+</html>
